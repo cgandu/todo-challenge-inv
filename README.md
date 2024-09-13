@@ -1,37 +1,92 @@
-# Invera ToDo-List Challenge (Python/Django Jr-SSr)
 
-El propósito de esta prueba es conocer tu capacidad para crear una pequeña aplicación funcional en un límite de tiempo. A continuación, encontrarás las funciones, los requisitos y los puntos clave que debés tener en cuenta durante el desarrollo.
+# Todo App - Django + Docker + PostgreSQL
 
-## Qué queremos que hagas:
+A To-Do app built with Django, using Docker and PostgreSQL. Supports JWT-based authentication and provides APIs for basic task management
 
-- El Challenge consiste en crear una aplicación web sencilla que permita a los usuarios crear y mantener una lista de tareas.
-- La entrega del resultado será en un nuevo fork de este repo y deberás hacer una pequeña demo del funcionamiento y desarrollo del proyecto ante un super comité de las más grandes mentes maestras de Invera, o a un par de devs, lo que sea más fácil de conseguir.
-- Podes contactarnos en caso que tengas alguna consulta.
+## Prerequisites
 
-## Objetivos:
 
-El usuario de la aplicación tiene que ser capaz de:
+- **Docker**
+- **Docker Compose**
 
-- Autenticarse
-- Crear una tarea
-- Eliminar una tarea
-- Marcar tareas como completadas
-- Poder ver una lista de todas las tareas existentes
-- Filtrar/buscar tareas por fecha de creación y/o por el contenido de la misma
+## Setup
 
-## Qué evaluamos:
+### env:
 
-- Desarrollo utilizando Python, Django. No es necesario crear un Front-End, pero sí es necesario tener una API que permita cumplir con los objetivos de arriba.
-- Uso de librerías y paquetes estandares que reduzcan la cantidad de código propio añadido.
-- Calidad y arquitectura de código. Facilidad de lectura y mantenimiento del código. Estándares seguidos.
-- [Bonus] Manejo de logs.
-- [Bonus] Creación de tests (unitarias y de integración)
-- [Bonus] Unificar la solución propuesta en una imagen de Docker por repositorio para poder ser ejecutada en cualquier ambiente (si aplica para full stack).
+Suggested .env file located in root directory (see .example_env)
 
-## Requerimientos de entrega:
 
-- Hacer un fork del proyecto y pushearlo en github. Puede ser privado.
-- La solución debe correr correctamente.
-- El Readme debe contener todas las instrucciones para poder levantar la aplicación, en caso de ser necesario, y explicar cómo se usa.
-- Disponibilidad para realizar una pequeña demo del proyecto al finalizar el challenge.
-- Tiempo para la entrega: Aproximadamente 7 días.
+### Build and start the containers:
+
+```bash
+docker-compose up -d --build
+```
+
+### Run database migrations:
+
+```bash
+docker-compose exec web python manage.py migrate
+```
+
+### Collect static files (for production):
+
+```bash
+docker-compose exec web python manage.py collectstatic --noinput
+```
+
+### Create a superuser (optional):
+
+```bash
+docker-compose exec web python manage.py createsuperuser
+```
+
+## API Endpoints
+
+### User Registration:
+
+- **POST** `/api/register/`
+  
+  ```bash
+  curl -X POST http://localhost:8000/api/register/   -H "Content-Type: application/json"   -d '{"username": "user1", "password": "your_password"}'
+  ```
+
+### Get JWT Token:
+
+- **POST** `/api/token/`
+  
+  ```bash
+  curl -X POST http://localhost:8000/api/token/   -H "Content-Type: application/json"   -d '{"username": "user1", "password": "your_password"}'
+  ```
+
+### Create a Task:
+
+- **POST** `/api/tasks/` (Requires Bearer Token)
+
+  ```bash
+  curl -X POST http://localhost:8000/api/tasks/   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"content": "New Task"}'
+  ```
+
+### List Tasks:
+
+- **GET** `/api/tasks/` (Requires Bearer Token)
+
+  ```bash
+  curl -X GET http://localhost:8000/api/tasks/   -H "Authorization: Bearer <access_token>"
+  ```
+
+### Update Task (partial):
+
+- **PATCH** `/api/tasks/<id>/` (Requires Bearer Token)
+
+  ```bash
+  curl -X PATCH http://localhost:8000/api/tasks/1/   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"completed": true}'
+  ```
+
+### Delete Task:
+
+- **DELETE** `/api/tasks/<id>/` (Requires Bearer Token)
+
+  ```bash
+  curl -X DELETE http://localhost:8000/api/tasks/1/   -H "Authorization: Bearer <access_token>"
+  ```
+
